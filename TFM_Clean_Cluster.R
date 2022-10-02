@@ -34,7 +34,7 @@ food_nutrient <- read.csv("~/UB- BigData/TFM/Datos/FoodData_Central_csv_2022-04-
 nutrient_incoming_name <- read.csv("~/UB- BigData/TFM/Datos/FoodData_Central_csv_2022-04-28/nutrient_incoming_name.csv")
 
 
-#Uni髇 de los productos con la informaci髇 de sus nutrientes: ---------------------------------
+#Uni贸n de los productos con la informaci贸n de sus nutrientes: ---------------------------------
 
 food_brnd <- branded_food %>% 
   merge(food, by = "fdc_id") %>% 
@@ -47,7 +47,7 @@ rm(food)
 rm(branded_food)
 rm(food_nutrient)
 
-#B鷖queda de productos veganos en el dataframe: ---------------------------------
+#B煤squeda de productos veganos en el dataframe: ---------------------------------
 
 
 vegan_products <- food_brnd %>% 
@@ -56,7 +56,7 @@ vegan_products <- food_brnd %>%
   distinct(gtin_upc, .keep_all = TRUE)
 
 
-#An醠isis de t閞minos m醩 frecuentes en la descripci髇 del producto: ---------------------------------
+#An谩lisis de t茅rminos m谩s frecuentes en la descripci贸n del producto: ---------------------------------
 
 food_text <- Corpus(VectorSource(vegan_products$description))
 
@@ -68,7 +68,7 @@ food_text_clean <- tm_map(food_text_clean, stripWhitespace)
 
 food_text_clean <- tm_map(food_text_clean, removeWords, stopwords('english'))
 
-# Representaci髇 de las palabras m醩 frecuentes mediante una nube de palabras: ---------------------------------
+# Representaci贸n de las palabras m谩s frecuentes mediante una nube de palabras: ---------------------------------
 
 wordcloud(food_text_clean, scale = c(2, 1), min.freq = 100, colors = rainbow(30))
 
@@ -76,7 +76,7 @@ paperCorp <- tm_map(food_text_clean, removeWords, c("veggie","vegan","veggies"))
 
 wordcloud(paperCorp, scale = c(2, 1), min.freq = 100, colors = rainbow(30))
 
-#Extracci髇 de las palabras m醩 frecuentes: ---------------------------------
+#Extracci贸n de las palabras m谩s frecuentes: ---------------------------------
 
 
 find_freq_terms_fun <- function(corpus_in){
@@ -93,7 +93,7 @@ find_freq_terms_fun <- function(corpus_in){
 
 freq_words <- find_freq_terms_fun(food_text_clean)
 
-#An醠isis de hamburguesa veganas: ---------------------------------
+#An谩lisis de hamburguesa veganas: ---------------------------------
 
 vegan_burger <- vegan_products %>% 
   filter(grepl("BURGER",toupper(description))) %>% 
@@ -111,7 +111,7 @@ burguers <- food_brnd %>%
            grepl("VEGGIE|VEGAN|MEAT FREE|VEGETARIAN|MEAT ANALOG|PROTEIN BURGER|BEAN BURGER|MORNINGSTAR|GARDENBURGER",toupper(description))) 
 
 
-# Categor韆s m醩 frecuentes:
+# Categor铆as m谩s frecuentes:
 
 
 cat <- burguers %>%   
@@ -120,7 +120,7 @@ cat <- burguers %>%
   summarise(n = n())
 
 
-#Exclusi髇 de algunas categor韆s que no son hamburguesas. Filtrado de los datos:
+#Exclusi贸n de algunas categor铆as que no son hamburguesas. Filtrado de los datos:
 
 exclud <- c(  "Pasta Dinners","Biscuits/Cookies (Shelf Stable)","Breads & Buns","Chips/Crisps/Snack Mixes - Natural/Extruded (Shelf Stable)", "Pickles, Olives, Peppers & Relishes","Pizza")
 
@@ -132,7 +132,7 @@ burguers <- burguers %>%
   filter(!branded_food_category %in% exclud)
 # filter(branded_food_category %in% includ)
 
-# Selecci髇 de nutrientes. Ana磍isis de valores faltantes:
+# Selecci贸n de nutrientes. Ana麓lisis de valores faltantes:
 
 burg_nut <-  burguers %>% dplyr::select(fdc_id,name, amount) %>% 
   dcast(fdc_id ~ name)
@@ -156,7 +156,7 @@ burg_nut3 <- burguers %>% dplyr::select(fdc_id,name, amount) %>%
   merge(burguers %>% dplyr::select(fdc_id, is_vegan, description), by = "fdc_id")
 
 
-#Exploraci髇 de las diferencias entre nutrientes seg鷑 si el producto es vegano o no: ---------------------------------
+#Exploraci贸n de las diferencias entre nutrientes seg煤n si el producto es vegano o no: ---------------------------------
 
 box_nut <- burg_nut3 %>% 
   melt(c("fdc_id","is_vegan","description")) %>% 
@@ -196,7 +196,7 @@ protein <- plot_ly(box_nut %>%  filter(variable == "Protein") %>% filter(grepl("
 protein
 
 
-#An醠isis cluster: ---------------------------------
+#An谩lisis cluster: ---------------------------------
 
 # Reescalo las variables creando un nuevo dataframe ---------------------------------
 
@@ -224,18 +224,18 @@ rownames(data_sca) <- desc
 summary(data_sca)
 
 
-# Visualizaci髇 del elbow method ---------------------------------
+# Visualizaci贸n del elbow method ---------------------------------
 
 fviz_nbclust(x = data_sca, FUNcluster = kmeans, method = "wss", k.max = 15, 
              diss = get_dist(data_sca, method = "euclidean"), nstart = 50)
 
-# Visualizaci髇 del dendrograma ---------------------------------
+# Visualizaci贸n del dendrograma ---------------------------------
 
 hc_euclidea_completo <- hclust(d = dist(x = data_sca, method = "euclidean"),
                                method = "complete")
 
 fviz_dend(x = hc_euclidea_completo, cex = 0.5, main = "Linkage completo",
-          sub = "Distancia eucl韉ea") +
+          sub = "Distancia eucl铆dea") +
   theme(plot.title =  element_text(hjust = 0.5, size = 15))
 
 
@@ -377,7 +377,7 @@ prod_clus <-as.data.frame(d$cluster) %>%
   merge(burg_nut3 %>% distinct(fdc_id, .keep_all = TRUE) %>% dplyr::select(fdc_id,description), by.x = "nam" ,by.y = "fdc_id", all.x = TRUE)
 
 
-#An醠isis LDA: ---------------------------------
+#An谩lisis LDA: ---------------------------------
 
 burg_nut5 <- burg_nut3 %>% 
   distinct(fdc_id, .keep_all = TRUE) %>% 
@@ -585,7 +585,7 @@ plot <- plot_ly(data = data_plot, y = ~ LD1, color =  X_train2$col, type = "scat
 
 plot
 
-#Clusterizamos los c醨nicos en general
+#Clusterizamos los c谩rnicos en general
 
 meat_nut4 <- meat_nut3 %>% dplyr::select(-description) %>% 
   filter(fdc_id != 745130) %>%  #Son especias
@@ -612,18 +612,18 @@ summary(data_sca)
 
 
 
-# Visualizaci髇 del elbow method ---------------------------------
+# Visualizaci贸n del elbow method ---------------------------------
 
 fviz_nbclust(x = data_sca, FUNcluster = kmeans, method = "wss", k.max = 15, 
              diss = get_dist(data_sca, method = "euclidean"), nstart = 50)
 
-# Visualizaci髇 del dendrograma ---------------------------------
+# Visualizaci贸n del dendrograma ---------------------------------
 
 hc_euclidea_completo <- hclust(d = dist(x = data_sca, method = "euclidean"),
                                method = "complete")
 
 fviz_dend(x = hc_euclidea_completo, cex = 0.5, main = "Linkage completo",
-          sub = "Distancia eucl韉ea") +
+          sub = "Distancia eucl铆dea") +
   theme(plot.title =  element_text(hjust = 0.5, size = 15))
 
 
